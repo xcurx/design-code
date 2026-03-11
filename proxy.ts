@@ -13,12 +13,12 @@ export default auth(async function proxy(req) {
     }
     
     if (session && pathname === "/sign-in") {
-        return NextResponse.redirect(new URL("/", req.url));
+        return NextResponse.redirect(new URL("/dashboard", req.url));
     }
 
     return NextResponse.next();
 })
 
 export const config = {
-    matcher: ["/", "/sign-in"],
+    matcher: ["/", "/sign-in", "/dashboard/:path*", "/problems/:path*", "/submissions/:path*"],
 }
