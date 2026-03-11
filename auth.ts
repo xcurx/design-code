@@ -9,7 +9,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     async jwt({ token, user, account, profile }) {
         if (account && profile?.email) {
             try {
-                prisma.user.upsert({
+                const dbUser = await prisma.user.upsert({
                     where: {
                         email: profile.email
                     },
@@ -24,7 +24,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
                     }
                 })
 
-                token.id = profile.id;
+                token.id = dbUser.id;
                 token.name = profile.name;
                 token.email = profile.email;
                 token.picture = profile.picture;

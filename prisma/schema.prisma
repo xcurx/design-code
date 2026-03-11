@@ -13,10 +13,70 @@ datasource db {
   provider = "postgresql"
 }
 
+enum Difficulty {
+  EASY
+  MEDIUM
+  HARD
+}
+
+enum SubmissionStatus {
+  PENDING
+  EVALUATING
+  COMPLETED
+  FAILED
+}
+
 model User {
-  id        String   @id @default(cuid())
-  name      String?
-  email     String?  @unique
-  image     String?
-  createdAt DateTime @default(now())
+  id          String       @id @default(cuid())
+  name        String?
+  email       String?      @unique
+  image       String?
+  createdAt   DateTime     @default(now())
+  submissions Submission[]
+}
+
+model Problem {
+  id                String       @id @default(cuid())
+  title             String
+  description       String
+  difficulty        Difficulty
+  tags              String[]
+  requirements      Json
+  sampleDiagramXml  String?
+  createdAt         DateTime     @default(now())
+  updatedAt         DateTime     @updatedAt
+  submissions       Submission[]
+}
+
+model Submission {
+  id         String           @id @default(cuid())
+  userId     String
+  problemId  String
+  diagramXml String
+  status     SubmissionStatus @default(PENDING)
+  createdAt  DateTime         @default(now())
+
+  user       User             @relation(fields: [userId], references: [id])
+  problem    Problem          @relation(fields: [problemId], references: [id])
+  evaluation Evaluation?
+
+  @@index([userId])
+  @@index([problemId])
+}
+
+model Evaluation {
+  id                    String   @id @default(cuid())
+  submissionId          String   @unique
+  overallScore          Float
+  structuralScore       Float
+  patternScore          Float
+  principlesScore       Float
+  couplingCohesionScore Float
+  strengths             Json
+  violations            Json
+  suggestions           Json
+  rawAgentOutput        Json?
+  createdAt             DateTime @default(now())
+
+  submission            Submission @relation(fields: [submissionId], references: [id])
 }
