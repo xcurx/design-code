@@ -161,11 +161,11 @@ export default async function DashboardPage() {
             <CardTitle>Quick Links</CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
-            <Button className="w-full justify-between" variant="outline" render={<Link href="/problems" />}>
+            <Button className="w-full justify-between" variant="outline" nativeButton={false} render={<Link href="/problems" />}>
               Browse Problems
               <ArrowRight className="h-4 w-4" />
             </Button>
-            <Button className="w-full justify-between" variant="outline" render={<Link href="/submissions" />}>
+            <Button className="w-full justify-between" variant="outline" nativeButton={false} render={<Link href="/submissions" />}>
               View All Submissions
               <ArrowRight className="h-4 w-4" />
             </Button>

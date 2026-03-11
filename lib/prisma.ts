@@ -1,5 +1,5 @@
 import { PrismaClient } from "@/app/generated/prisma/client"
-import { PrismaPostgresAdapter } from '@prisma/adapter-ppg'
+import { PrismaPg } from '@prisma/adapter-pg'
 
 const globalForPrisma = global as unknown as {
     prisma: PrismaClient
@@ -8,9 +8,7 @@ const globalForPrisma = global as unknown as {
 const connectionString = `${process.env.DATABASE_URL}`;
 
 function createPrismaClient() {
-    const adapter = new PrismaPostgresAdapter({
-        connectionString
-    });
+    const adapter = new PrismaPg({ connectionString, ssl: { rejectUnauthorized: false } });
     return new PrismaClient({
         adapter
     })
