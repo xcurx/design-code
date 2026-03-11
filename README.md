@@ -1,36 +1,131 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# DesignCode
+
+An AI-powered platform for learning, evaluating, and mastering UML-based Low-Level Design — like LeetCode, but for system design.
+
+Students draw UML class diagrams, submit them, and receive AI-generated scores and actionable feedback on pattern compliance, SOLID principles, coupling/cohesion, and structural completeness.
+
+## Tech Stack
+
+- **Frontend**: Next.js 16, React 19, Tailwind CSS v4, shadcn/ui
+- **UML Editor**: React Flow (`@xyflow/react`)
+- **Auth**: NextAuth.js (Google OAuth)
+- **Database**: PostgreSQL (Prisma Postgres) with Prisma ORM
+- **AI Module**: Separate Python FastAPI service (CrewAI/LangGraph) — not in this repo
+
+## Prerequisites
+
+- [Node.js](https://nodejs.org/) v20+
+- [pnpm](https://pnpm.io/) v10+
+- A [Prisma Postgres](https://www.prisma.io/postgres) database (or any PostgreSQL instance)
+- Google OAuth credentials (for authentication)
 
 ## Getting Started
 
-First, run the development server:
+### 1. Clone the repo
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+git clone <repo-url>
+cd design-code
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### 2. Install dependencies
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+pnpm install
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### 3. Set up environment variables
 
-## Learn More
+Create a `.env` file in the root directory:
 
-To learn more about Next.js, take a look at the following resources:
+```env
+# Database
+DATABASE_URL="postgresql://user:password@host:port/database?sslmode=require"
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+# NextAuth
+AUTH_SECRET="your-random-secret-here"  # Generate with: npx auth secret
+AUTH_GOOGLE_ID="your-google-client-id"
+AUTH_GOOGLE_SECRET="your-google-client-secret"
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+# AI Service (optional — needed for evaluation pipeline)
+AI_SERVICE_URL="http://localhost:8000"
+```
 
-## Deploy on Vercel
+**Getting Google OAuth credentials:**
+1. Go to [Google Cloud Console](https://console.cloud.google.com/apis/credentials)
+2. Create a new OAuth 2.0 Client ID
+3. Set Authorized redirect URI to `http://localhost:3000/api/auth/callback/google`
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### 4. Set up the database
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```bash
+# Run migrations to create all tables
+npx prisma migrate dev
+
+# Generate the Prisma client
+npx prisma generate
+
+# Seed the database with LLD problems
+pnpm seed
+```
+
+### 5. Run the dev server
+
+```bash
+pnpm dev
+```
+
+Open [http://localhost:3000](http://localhost:3000) — you'll be redirected to sign in with Google.
+
+## Project Structure
+
+```
+app/
+  (main)/              # Authenticated routes (sidebar layout)
+    dashboard/         # Dashboard with stats
+    problems/          # Problem listing + detail + editor
+    submissions/       # Submission history + results
+  api/                 # API routes (auth, submissions)
+  sign-in/             # Sign-in page
+  generated/prisma/    # Auto-generated Prisma client
+components/
+  editor/              # UML diagram editor components
+  providers/           # Context providers (session)
+  ui/                  # shadcn/ui components
+lib/
+  prisma.ts            # Prisma client singleton
+  utils.ts             # Utility functions
+  xml-generator.ts     # React Flow → XML export
+  ai-service.ts        # HTTP client for AI module
+prisma/
+  schema.prisma        # Database schema
+  seed.ts              # Problem seed data
+  migrations/          # SQL migrations
+```
+
+## Available Scripts
+
+| Command | Description |
+|---------|-------------|
+| `pnpm dev` | Start development server |
+| `pnpm build` | Create production build |
+| `pnpm start` | Start production server |
+| `pnpm seed` | Seed database with LLD problems |
+| `npx prisma migrate dev` | Run database migrations |
+| `npx prisma generate` | Regenerate Prisma client |
+| `npx prisma studio` | Open Prisma Studio (DB GUI) |
+
+## Architecture
+
+```
+User → Next.js Frontend (UML Editor) → XML Export
+                                          ↓
+                              Next.js API Routes
+                                          ↓
+                              Python AI Service (FastAPI)
+                              ├─ Agent 1: Pattern Detection
+                              ├─ Agent 2: Structural Validator
+                              └─ Agent 3: Design Metrics Analyzer
+                                          ↓
+                              Scores + Feedback → Results Page
+```
