@@ -54,7 +54,7 @@ Expand `prisma/schema.prisma` with all required models:
 
 ### Step 5 — Seed Script for Problems
 
-*Depends on: Step 1*
+_Depends on: Step 1_
 
 - Create `prisma/seed.ts` with 5–8 classic LLD problems:
   - Parking Lot System
@@ -70,7 +70,7 @@ Expand `prisma/schema.prisma` with all required models:
 
 ### Step 6 — Problems List Page
 
-**Route**: `app/(main)/problems/page.tsx` — *Depends on: Step 5*
+**Route**: `app/(main)/problems/page.tsx` — _Depends on: Step 5_
 
 - Server component fetching all problems from DB
 - Card grid layout: title, difficulty badge (color-coded: green/yellow/red), tags, short description
@@ -79,7 +79,7 @@ Expand `prisma/schema.prisma` with all required models:
 
 ### Step 7 — Problem Detail Page
 
-**Route**: `app/(main)/problems/[id]/page.tsx` — *Depends on: Step 6*
+**Route**: `app/(main)/problems/[id]/page.tsx` — _Depends on: Step 6_
 
 - **Left panel**: problem description (rendered markdown), requirements section listing expected classes/relationships/patterns
 - **Right panel / tab**: "Start Solving" button → navigates to editor
@@ -91,7 +91,7 @@ Expand `prisma/schema.prisma` with all required models:
 
 ### Step 8 — UML Class Node Component
 
-**File**: `components/editor/ClassNode.tsx` — *Can be built in parallel with Steps 5–7*
+**File**: `components/editor/ClassNode.tsx` — _Can be built in parallel with Steps 5–7_
 
 - Custom React Flow node shaped as a UML class box with 3 compartments:
   1. **Class Name** (supports `<<interface>>` / `<<abstract>>` stereotypes)
@@ -106,15 +106,15 @@ Expand `prisma/schema.prisma` with all required models:
 
 5 custom edge types matching UML notation:
 
-| Type | Line Style | Arrow/Marker |
-|------|-----------|--------------|
-| Inheritance | Solid | Hollow triangle |
-| Association | Solid | Open arrow |
-| Aggregation | Solid | Hollow diamond |
-| Composition | Solid | Filled diamond |
-| Dependency | Dashed | Open arrow |
+| Type        | Line Style | Arrow/Marker    |
+| ----------- | ---------- | --------------- |
+| Inheritance | Solid      | Hollow triangle |
+| Association | Solid      | Open arrow      |
+| Aggregation | Solid      | Hollow diamond  |
+| Composition | Solid      | Filled diamond  |
+| Dependency  | Dashed     | Open arrow      |
 
-- Each edge supports **multiplicity labels** (1, *, 0..1, 1..*)
+- Each edge supports **multiplicity labels** (1, _, 0..1, 1.._)
 - User selects relationship type from toolbar, then draws from source to target node
 
 ### Step 10 — Editor Page & Toolbar
@@ -168,18 +168,18 @@ Converts React Flow nodes + edges state into deterministic XML:
 
 ### Step 12 — Submission API Routes
 
-*Depends on: Steps 1, 11*
+_Depends on: Steps 1, 11_
 
-| Route | Method | Description |
-|-------|--------|-------------|
-| `app/api/submissions/route.ts` | POST | Create submission (accept `{ problemId, diagramXml }`, validate auth, create with status PENDING) |
-| `app/api/submissions/route.ts` | GET | List user's submissions (paginated) |
-| `app/api/submissions/[id]/route.ts` | GET | Get single submission + evaluation |
-| `app/api/submissions/[id]/evaluate/route.ts` | POST | Trigger AI evaluation |
+| Route                                        | Method | Description                                                                                       |
+| -------------------------------------------- | ------ | ------------------------------------------------------------------------------------------------- |
+| `app/api/submissions/route.ts`               | POST   | Create submission (accept `{ problemId, diagramXml }`, validate auth, create with status PENDING) |
+| `app/api/submissions/route.ts`               | GET    | List user's submissions (paginated)                                                               |
+| `app/api/submissions/[id]/route.ts`          | GET    | Get single submission + evaluation                                                                |
+| `app/api/submissions/[id]/evaluate/route.ts` | POST   | Trigger AI evaluation                                                                             |
 
 ### Step 13 — AI Service Client
 
-**File**: `lib/ai-service.ts` — *Depends on: Step 12*
+**File**: `lib/ai-service.ts` — _Depends on: Step 12_
 
 HTTP client calling the Python FastAPI backend:
 
@@ -190,6 +190,7 @@ AI_SERVICE_URL=http://localhost:8000  (env var)
 **Contract for AI team** (the integration interface):
 
 **Request** — `POST /evaluate`:
+
 ```json
 {
   "problemId": "clxyz...",
@@ -205,6 +206,7 @@ AI_SERVICE_URL=http://localhost:8000  (env var)
 ```
 
 **Response**:
+
 ```json
 {
   "overallScore": 82,
@@ -229,9 +231,10 @@ AI_SERVICE_URL=http://localhost:8000  (env var)
 
 ### Step 14 — Async Evaluation with Polling
 
-*Depends on: Steps 12, 13*
+_Depends on: Steps 12, 13_
 
 Flow:
+
 1. User clicks "Submit" → `POST /api/submissions` → returns submission ID (status: PENDING)
 2. Frontend calls `POST /api/submissions/[id]/evaluate` → triggers AI call (status: EVALUATING)
 3. Frontend **polls** `GET /api/submissions/[id]` every 2–3 seconds
@@ -246,7 +249,7 @@ Flow:
 
 ### Step 15 — Results Page
 
-**Route**: `app/(main)/submissions/[id]/page.tsx` — *Depends on: Step 14*
+**Route**: `app/(main)/submissions/[id]/page.tsx` — _Depends on: Step 14_
 
 - **Score Gauge**: Large circular radial gauge showing overall score (0–100)
   - Color: red (<40), yellow (40–70), green (>70)
@@ -258,7 +261,7 @@ Flow:
 
 ### Step 16 — Feedback Panels
 
-*Parallel with: Step 15*
+_Parallel with: Step 15_
 
 Three categorized sections:
 
@@ -306,39 +309,39 @@ Three categorized sections:
 
 ### Existing Files to Modify
 
-| File | Changes |
-|------|---------|
-| `prisma/schema.prisma` | Add Problem, Submission, Evaluation models + enums |
-| `auth.ts` | Fix missing `await` on upsert, add DB user ID to JWT |
-| `proxy.ts` | Extend matcher for `/(main)/*` routes |
-| `app/layout.tsx` | Update metadata, add SessionProvider |
-| `app/page.tsx` | Redirect to /dashboard |
-| `package.json` | Add shadcn/ui, @xyflow/react, react-markdown deps |
+| File                   | Changes                                              |
+| ---------------------- | ---------------------------------------------------- |
+| `prisma/schema.prisma` | Add Problem, Submission, Evaluation models + enums   |
+| `auth.ts`              | Fix missing `await` on upsert, add DB user ID to JWT |
+| `proxy.ts`             | Extend matcher for `/(main)/*` routes                |
+| `app/layout.tsx`       | Update metadata, add SessionProvider                 |
+| `app/page.tsx`         | Redirect to /dashboard                               |
+| `package.json`         | Add shadcn/ui, @xyflow/react, react-markdown deps    |
 
 ### New Files to Create
 
-| File | Purpose |
-|------|---------|
-| `app/(main)/layout.tsx` | Authenticated shell with sidebar navigation |
-| `app/(main)/dashboard/page.tsx` | Dashboard with stats and recent activity |
-| `app/(main)/problems/page.tsx` | Problem listing with filters |
-| `app/(main)/problems/[id]/page.tsx` | Problem detail with description + requirements |
-| `app/(main)/problems/[id]/solve/page.tsx` | UML editor page |
-| `app/(main)/submissions/page.tsx` | Submission history table |
-| `app/(main)/submissions/[id]/page.tsx` | Results page with scores + feedback |
-| `components/editor/ClassNode.tsx` | Custom UML class React Flow node |
-| `components/editor/RelationshipEdge.tsx` | Custom UML relationship edges (5 types) |
-| `components/editor/EditorToolbar.tsx` | Editor toolbar component |
-| `components/editor/EditorCanvas.tsx` | React Flow canvas wrapper |
-| `components/ui/score-gauge.tsx` | Circular score visualization |
-| `lib/xml-generator.ts` | React Flow state → XML export |
-| `lib/ai-service.ts` | HTTP client for AI module |
-| `lib/ai-service.mock.ts` | Mock AI responses for dev/testing |
-| `app/api/submissions/route.ts` | Submission list + create API |
-| `app/api/submissions/[id]/route.ts` | Single submission API |
-| `app/api/submissions/[id]/evaluate/route.ts` | Trigger evaluation API |
-| `app/api/problems/route.ts` | Problems listing API (optional, using server components) |
-| `prisma/seed.ts` | Seed data for LLD problems |
+| File                                         | Purpose                                                  |
+| -------------------------------------------- | -------------------------------------------------------- |
+| `app/(main)/layout.tsx`                      | Authenticated shell with sidebar navigation              |
+| `app/(main)/dashboard/page.tsx`              | Dashboard with stats and recent activity                 |
+| `app/(main)/problems/page.tsx`               | Problem listing with filters                             |
+| `app/(main)/problems/[id]/page.tsx`          | Problem detail with description + requirements           |
+| `app/(main)/problems/[id]/solve/page.tsx`    | UML editor page                                          |
+| `app/(main)/submissions/page.tsx`            | Submission history table                                 |
+| `app/(main)/submissions/[id]/page.tsx`       | Results page with scores + feedback                      |
+| `components/editor/ClassNode.tsx`            | Custom UML class React Flow node                         |
+| `components/editor/RelationshipEdge.tsx`     | Custom UML relationship edges (5 types)                  |
+| `components/editor/EditorToolbar.tsx`        | Editor toolbar component                                 |
+| `components/editor/EditorCanvas.tsx`         | React Flow canvas wrapper                                |
+| `components/ui/score-gauge.tsx`              | Circular score visualization                             |
+| `lib/xml-generator.ts`                       | React Flow state → XML export                            |
+| `lib/ai-service.ts`                          | HTTP client for AI module                                |
+| `lib/ai-service.mock.ts`                     | Mock AI responses for dev/testing                        |
+| `app/api/submissions/route.ts`               | Submission list + create API                             |
+| `app/api/submissions/[id]/route.ts`          | Single submission API                                    |
+| `app/api/submissions/[id]/evaluate/route.ts` | Trigger evaluation API                                   |
+| `app/api/problems/route.ts`                  | Problems listing API (optional, using server components) |
+| `prisma/seed.ts`                             | Seed data for LLD problems                               |
 
 ---
 
