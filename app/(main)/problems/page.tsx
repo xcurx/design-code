@@ -82,7 +82,7 @@ export default async function ProblemsPage({
 
             return (
               <Link key={problem.id} href={`/problems/${problem.id}`}>
-                <Card className="h-full transition-colors hover:border-primary/50 hover:shadow-md">
+                <Card className="h-full cursor-pointer transition-all duration-200 hover:border-primary/60 hover:shadow-lg hover:-translate-y-1">
                   <CardHeader className="pb-3">
                     <div className="flex items-start justify-between gap-2">
                       <CardTitle className="text-base leading-snug">
@@ -109,7 +109,7 @@ export default async function ProblemsPage({
 
                     <div className="flex flex-wrap gap-1.5">
                       {problem.tags.map((tag) => (
-                        <Badge key={tag} variant="secondary" className="text-xs">
+                        <Badge key={tag} variant="secondary" className="text-xs transition-colors hover:bg-primary/20">
                           {tag}
                         </Badge>
                       ))}
