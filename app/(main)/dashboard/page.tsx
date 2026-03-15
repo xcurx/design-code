@@ -299,19 +299,23 @@ export default async function DashboardPage() {
           </CardHeader>
           <CardContent className="px-4 pb-4">
             {recentSubmissions.length === 0 ? (
-              <div className="flex flex-col items-center justify-center rounded-lg border border-dashed py-12 text-center">
-                <ClipboardList className="size-10 text-muted-foreground/40" />
-                <p className="mt-3 text-sm font-medium">No submissions yet</p>
-                <p className="mt-1 text-xs text-muted-foreground">
-                  Pick a problem and start designing!
+              <div className="relative overflow-hidden flex flex-col items-center justify-center rounded-xl border border-dashed border-border/60 bg-muted/10 py-14 text-center">
+                <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:14px_24px] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)]" />
+                <div className="relative z-10 flex size-12 items-center justify-center rounded-2xl bg-muted/50 border shadow-sm mb-4">
+                  <ClipboardList className="size-6 text-muted-foreground/50" />
+                </div>
+                <h3 className="text-base font-semibold text-foreground relative z-10">No recent activity</h3>
+                <p className="mt-1.5 mb-5 max-w-[250px] text-sm text-muted-foreground relative z-10">
+                  You haven't submitted any designs yet. Pick a problem to get started!
                 </p>
                 <Button
-                  className="mt-4"
                   size="sm"
+                  className="relative z-10 shadow-sm transition-all hover:scale-105"
                   nativeButton={false}
                   render={<Link href="/problems" />}
                 >
-                  Get Started
+                  <BookOpen className="mr-2 size-4" />
+                  Browse Directory
                 </Button>
               </div>
             ) : (
@@ -399,7 +403,7 @@ export default async function DashboardPage() {
                   <Link
                     key={problem.id}
                     href={`/problems/${problem.id}`}
-                    className="group flex items-center gap-3 py-3 first:pt-0 last:pb-0 -mx-2 px-2 rounded-lg transition-colors hover:bg-muted/30"
+                    className="group flex items-center gap-3 py-3 first:pt-0 last:pb-0 -mx-2 px-3 rounded-lg transition-all hover:bg-accent hover:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.1)] active:scale-[0.98]"
                   >
                     <div className="min-w-0 flex-1">
                       <p className="truncate text-sm font-medium group-hover:text-foreground">
