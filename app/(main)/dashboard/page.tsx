@@ -17,6 +17,7 @@ import {
   ChevronRight,
   Flame,
 } from "lucide-react";
+import { ActivityBarChart, ScoreAreaChart } from "@/components/dashboard-charts";
 
 const statusColors: Record<string, string> = {
   COMPLETED: "bg-emerald-500/10 text-emerald-600 border-emerald-500/20",
@@ -148,84 +149,128 @@ export default async function DashboardPage() {
             )}
           </div>
         </div>
-        {/* Decorative circle */}
-        <div className="pointer-events-none absolute -right-16 -top-16 size-64 rounded-full bg-primary/3" />
-        <div className="pointer-events-none absolute -bottom-20 -right-8 size-48 rounded-full bg-primary/4" />
+        {/* Decorative elements */}
+        <div className="pointer-events-none absolute -right-16 -top-16 size-80 rounded-full bg-primary/5 blur-3xl" />
+        <div className="pointer-events-none absolute -bottom-20 -right-8 size-60 rounded-full bg-primary/10 blur-3xl" />
       </div>
 
       {/* ── Stats Grid ── */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <Card className="relative overflow-hidden">
-          <CardContent className="flex items-center gap-4 p-5">
-            <div className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-blue-500/10">
-              <ClipboardList className="size-5 text-blue-600" />
+        {/* Submissions Card with Activity Chart */}
+        <Card className="relative overflow-hidden group">
+          <CardContent className="p-0">
+            <div className="p-5 flex items-center justify-between pb-2">
+              <div className="flex flex-col gap-1">
+                <p className="text-xs font-medium text-muted-foreground">
+                  Total Submissions
+                </p>
+                <p className="text-3xl font-bold font-mono tracking-tight">
+                  {totalSubmissions}
+                </p>
+              </div>
+              <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-blue-500/10 text-blue-600">
+                <ClipboardList className="size-5" />
+              </div>
             </div>
-            <div>
-              <p className="text-xs font-medium text-muted-foreground">
-                Submissions
-              </p>
-              <p className="text-2xl font-bold tabular-nums">
-                {totalSubmissions}
-              </p>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="relative overflow-hidden">
-          <CardContent className="flex items-center gap-4 p-5">
-            <div className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-emerald-500/10">
-              <TrendingUp className="size-5 text-emerald-600" />
-            </div>
-            <div>
-              <p className="text-xs font-medium text-muted-foreground">
-                Avg Score
-              </p>
-              <p className="text-2xl font-bold tabular-nums">
-                {completedSubmissions.length > 0 ? (
-                  <span className={scoreColor(averageScore)}>{averageScore}</span>
-                ) : (
-                  <span className="text-muted-foreground">—</span>
-                )}
-              </p>
+            {/* Minimalist Bar Chart for Activity */}
+            <div className="h-16 w-full px-2 mt-auto opacity-60 group-hover:opacity-100 transition-opacity">
+               <ActivityBarChart 
+                 data={submissions.slice(0, 7).reverse().map((s, i) => ({ value: s.evaluation?.overallScore || 20, name: i }))} 
+               />
             </div>
           </CardContent>
         </Card>
 
-        <Card className="relative overflow-hidden">
-          <CardContent className="flex items-center gap-4 p-5">
-            <div className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-violet-500/10">
-              <Target className="size-5 text-violet-600" />
+        {/* Avg Score Card with Sparkline */}
+        <Card className="relative overflow-hidden group">
+          <CardContent className="p-0">
+            <div className="p-5 flex items-center justify-between pb-2 z-10 relative">
+              <div className="flex flex-col gap-1">
+                <p className="text-xs font-medium text-muted-foreground">
+                  Avg Score
+                </p>
+                <p className="text-3xl font-bold font-mono tracking-tight">
+                  {completedSubmissions.length > 0 ? (
+                    <span className={scoreColor(averageScore)}>{averageScore}</span>
+                  ) : (
+                    <span className="text-muted-foreground">—</span>
+                  )}
+                </p>
+              </div>
+              <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-emerald-500/10 text-emerald-600">
+                <TrendingUp className="size-5" />
+              </div>
             </div>
-            <div>
-              <p className="text-xs font-medium text-muted-foreground">
-                Attempted
-              </p>
-              <p className="text-2xl font-bold tabular-nums">
-                {problemsAttempted}
-                <span className="text-sm font-normal text-muted-foreground">
-                  /{problemCount}
-                </span>
-              </p>
+            {/* Sparkline Area Chart */}
+             <div className="absolute bottom-0 left-0 right-0 h-16 opacity-30 group-hover:opacity-60 transition-opacity pointer-events-none">
+                <ScoreAreaChart 
+                  data={completedSubmissions.slice(0, 10).reverse().map(s => ({ score: s.evaluation?.overallScore }))} 
+                />
             </div>
           </CardContent>
         </Card>
 
-        <Card className="relative overflow-hidden">
-          <CardContent className="flex items-center gap-4 p-5">
-            <div className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-amber-500/10">
-              <Trophy className="size-5 text-amber-600" />
+        {/* Attempted Card with Progress Indicator */}
+        <Card className="relative overflow-hidden group">
+          <CardContent className="p-5 flex flex-col h-full justify-between">
+            <div className="flex items-center justify-between">
+               <div className="flex flex-col gap-1">
+                <p className="text-xs font-medium text-muted-foreground">
+                  Attempted
+                </p>
+                <p className="text-3xl font-bold font-mono tracking-tight flex items-baseline gap-1">
+                  {problemsAttempted}
+                  <span className="text-sm font-medium text-muted-foreground font-sans">
+                    / {problemCount}
+                  </span>
+                </p>
+              </div>
+              <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-violet-500/10 text-violet-600">
+                <Target className="size-5" />
+              </div>
             </div>
-            <div>
-              <p className="text-xs font-medium text-muted-foreground">
-                Best Score
-              </p>
-              <p className="text-2xl font-bold tabular-nums">
-                {bestScore !== null ? (
-                  <span className={scoreColor(bestScore)}>{bestScore}</span>
-                ) : (
-                  <span className="text-muted-foreground">—</span>
-                )}
-              </p>
+            {/* Progress Bar */}
+            <div className="mt-4 pt-4 border-t border-border/50">
+               <div className="h-1.5 w-full bg-secondary rounded-full overflow-hidden">
+                 <div
+                   className="h-full bg-violet-500 rounded-full transition-all duration-1000 ease-out"
+                   style={{ width: `${(problemsAttempted / Math.max(problemCount, 1)) * 100}%` }}
+                 />
+               </div>
+               <p className="text-[10px] text-muted-foreground mt-2 text-right">
+                  {Math.round((problemsAttempted / Math.max(problemCount, 1)) * 100)}% coverage
+               </p>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Best Score with Minimalist design */}
+        <Card className="relative overflow-hidden group">
+          <CardContent className="p-5 flex flex-col h-full justify-between">
+            <div className="flex items-center justify-between">
+              <div className="flex flex-col gap-1">
+                <p className="text-xs font-medium text-muted-foreground">
+                  Best Score
+                </p>
+                <p className="text-3xl font-bold font-mono tracking-tight">
+                  {bestScore !== null ? (
+                    <span className={scoreColor(bestScore)}>{bestScore}</span>
+                  ) : (
+                    <span className="text-muted-foreground">—</span>
+                  )}
+                </p>
+              </div>
+               <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-amber-500/10 text-amber-600">
+                <Trophy className="size-5" />
+              </div>
+            </div>
+             <div className="mt-4 pt-4 border-t border-border/50 flex items-center justify-between">
+               <span className="text-xs text-muted-foreground">Top Performance</span>
+               {bestScore !== null && bestScore >= 90 && (
+                 <Badge variant="secondary" className="bg-amber-500/10 text-amber-600 border-amber-500/20 text-[10px] uppercase font-mono px-1.5 py-0">
+                    Excellent
+                 </Badge>
+               )}
             </div>
           </CardContent>
         </Card>
