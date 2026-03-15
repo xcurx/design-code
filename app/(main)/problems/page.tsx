@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Search, Sparkles, Box, Puzzle, CheckCircle2, CircleDashed } from "lucide-react";
+import { ProblemsFilter } from "@/components/problems-filter";
 
 const difficultyColor: Record<string, string> = {
   EASY: "bg-emerald-500/10 text-emerald-600 border-emerald-500/20",
@@ -84,38 +85,7 @@ export default async function ProblemsPage({
       </div>
 
       {/* ── Filters & Search ── */}
-      <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between sticky top-0 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 py-2 z-10 -mx-2 px-2">
-        <form className="flex w-full sm:w-auto flex-wrap sm:flex-nowrap items-center gap-3">
-          <div className="relative w-full sm:w-64">
-            <Search className="absolute left-2.5 top-2.5 size-4 text-muted-foreground" />
-            <input
-              type="text"
-              name="q"
-              placeholder="Search problems..."
-              defaultValue={q ?? ""}
-              className="h-9 w-full rounded-md border border-input bg-background pl-9 pr-3 text-sm shadow-sm transition-colors placeholder:text-muted-foreground hover:border-accent-foreground/20 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-            />
-          </div>
-          
-          <div className="flex w-full sm:w-auto p-1 items-center bg-muted/50 rounded-lg border">
-            {["ALL", "EASY", "MEDIUM", "HARD"].map((level) => (
-              <button
-                key={level}
-                type="submit"
-                name="difficulty"
-                value={level}
-                className={`inline-flex flex-1 sm:flex-none justify-center h-7 items-center rounded-md px-3 text-xs font-semibold transition-all ${
-                  (difficulty ?? "ALL") === level
-                    ? "bg-background text-foreground shadow-sm"
-                    : "text-muted-foreground hover:text-foreground hover:bg-muted"
-                }`}
-              >
-                {level === "ALL" ? "All" : level.charAt(0) + level.slice(1).toLowerCase()}
-              </button>
-            ))}
-          </div>
-        </form>
-      </div>
+      <ProblemsFilter />
 
       {/* ── Problem Grid ── */}
       {problems.length === 0 ? (
@@ -140,7 +110,7 @@ export default async function ProblemsPage({
           </div>
       ) : (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-          {problems.map((problem) => {
+          {problems.map((problem, idx) => {
             const requirements = problem.requirements as {
               expectedClasses?: string[];
               expectedPatterns?: string[];
@@ -150,7 +120,12 @@ export default async function ProblemsPage({
             const isAttempted = !isCompleted && attemptedProblemIds.has(problem.id);
 
             return (
-              <Link key={problem.id} href={`/problems/${problem.id}`} className="group h-full">
+              <Link 
+                key={problem.id} 
+                href={`/problems/${problem.id}`} 
+                className="group h-full animate-in fade-in slide-in-from-bottom-4 duration-500 fill-mode-both"
+                style={{ animationDelay: `${idx * 50}ms` }}
+              >
                 <Card className="h-full flex flex-col overflow-hidden transition-all duration-300 hover:border-primary/40 hover:shadow-md hover:-translate-y-1 bg-gradient-to-b from-background to-background group-hover:to-muted/20">
                   <CardHeader className="pb-3 border-b border-border/40 bg-muted/10">
                     <div className="flex items-start justify-between gap-3">
