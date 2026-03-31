@@ -4,11 +4,14 @@ import { signIn } from "next-auth/react";
 import { Code2, Sparkles, Layout, Cpu, Database, Network } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useEffect, useState, useRef } from "react";
-import Antigravity from "./Antigravity";
+import dynamic from "next/dynamic";
+
+const Antigravity = dynamic(() => import("./Antigravity"), { ssr: false });
 
 export default function SignIn() {
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const containerRef = useRef<HTMLDivElement>(null);
+  const containerHeight = containerRef.current?.clientHeight ?? 0;
 
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
@@ -83,7 +86,7 @@ export default function SignIn() {
              <div 
                className="pointer-events-none absolute -inset-px opacity-0 transition duration-300 group-hover:opacity-100"
                style={{
-                 background: `radial-gradient(400px circle at ${mousePosition.x - 48}px ${mousePosition.y - window.innerHeight / 2 + 100}px, rgba(139,92,246,0.08), transparent 40%)`
+                 background: `radial-gradient(400px circle at ${mousePosition.x - 48}px ${mousePosition.y - containerHeight / 2 + 100}px, rgba(139,92,246,0.08), transparent 40%)`
                }}
              />
 
