@@ -10,6 +10,7 @@ import {
   addEdge,
   useNodesState,
   useEdgesState,
+  useReactFlow,
   type Connection,
   type Edge,
   type Node,
@@ -35,6 +36,10 @@ import type {
   RelationshipEdgeData,
   RelationshipType,
 } from "./types";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
+import { parseXmlToDiagram } from "./xml-parser";
 
 // ── node & edge type registrations (stable reference) ──
 
@@ -66,6 +71,11 @@ export default function EditorCanvas({
   const [activeRelType, setActiveRelType] =
     useState<RelationshipType>("association");
   const [xmlPreviewOpen, setXmlPreviewOpen] = useState(false);
+  const [xmlImportOpen, setXmlImportOpen] = useState(false);
+  const [xmlImportContent, setXmlImportContent] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const router = useRouter();
+  const { fitView } = useReactFlow();
 
   // ── Undo / Redo ──
   const historyRef = useRef<HistoryEntry[]>([{ nodes: [], edges: [] }]);
@@ -162,7 +172,7 @@ export default function EditorCanvas({
     [activeRelType, setEdges, pushHistory]
   );
 
-  // ── XML generation (minimal — full version in Step 11) ──
+  // ── XML generation ──
   const generateXml = useCallback(() => {
     const classNodes = nodes.filter((n) => n.type === "class") as (Node & {
       data: ClassNodeData;
@@ -214,10 +224,65 @@ export default function EditorCanvas({
     setXmlPreviewOpen(true);
   }, [generateXml]);
 
-  const handleSubmit = useCallback(() => {
-    // Placeholder: will be wired to submission API in Step 12
-    const _xml = generateXml();
-  }, [generateXml]);
+  const handleSubmit = useCallback(async () => {
+    const xml = generateXml();
+    setIsSubmitting(true);
+    let toastId;
+    try {
+      toastId = toast.loading("Submitting diagram...");
+      const res = await fetch("/api/submissions", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ problemId, diagramXml: xml }),
+      });
+      
+      if (!res.ok) {
+        throw new Error(await res.text());
+      }
+      
+      const submission = await res.json();
+      toast.success("Diagram submitted successfully!", { id: toastId });
+      
+      // Evaluation trigger removed from here to prevent browser abortion on redirect.
+      // We will let the Submission Result Page handle triggering the evaluation when it sees a PENDING status.
+      
+      router.push(`/submissions/${submission.id}`);
+    } catch (err: any) {
+      console.error(err);
+      toast.error("Failed to submit: " + err.message, { id: toastId });
+      setIsSubmitting(false);
+    }
+  }, [generateXml, problemId, router]);
+
+  // ── Import XML handler ──
+  const handleImportXml = useCallback(() => {
+    setXmlImportContent("");
+    setXmlImportOpen(true);
+  }, []);
+
+  const handleImportConfirm = useCallback(() => {
+    try {
+      const { nodes: importedNodes, edges: importedEdges } = parseXmlToDiagram(xmlImportContent);
+
+      if (importedNodes.length === 0) {
+        toast.error("No classes found in the XML.");
+        return;
+      }
+
+      setNodes(importedNodes);
+      setEdges(importedEdges);
+      pushHistory(importedNodes, importedEdges);
+      setXmlImportOpen(false);
+      toast.success(`Imported ${importedNodes.length} classes and ${importedEdges.length} relationships.`);
+
+      // Fit view after React Flow has rendered the new nodes
+      setTimeout(() => {
+        fitView({ padding: 0.2 });
+      }, 150);
+    } catch (err: any) {
+      toast.error("Import failed: " + err.message);
+    }
+  }, [xmlImportContent, setNodes, setEdges, pushHistory]);
 
   // ── Left sidebar: class list ──
   const classNodes = useMemo(
@@ -278,6 +343,7 @@ export default function EditorCanvas({
             activeRelationshipType={activeRelType}
             onRelationshipTypeChange={setActiveRelType}
             onPreviewXml={handlePreviewXml}
+            onImportXml={handleImportXml}
             onSubmit={handleSubmit}
             canUndo={canUndo}
             canRedo={canRedo}
@@ -326,6 +392,32 @@ export default function EditorCanvas({
             <pre className="p-4 text-xs leading-relaxed">
               <code>{xmlContent}</code>
             </pre>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* ── XML Import Dialog ── */}
+      <Dialog open={xmlImportOpen} onOpenChange={setXmlImportOpen}>
+        <DialogContent className="sm:max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Import Diagram XML</DialogTitle>
+            <DialogDescription>
+              Paste your diagram XML below. This will replace the current diagram.
+            </DialogDescription>
+          </DialogHeader>
+          <textarea
+            className="w-full h-[40vh] rounded-lg border bg-muted p-4 text-xs font-mono leading-relaxed focus:outline-none focus:ring-2 focus:ring-ring resize-none"
+            placeholder={`<diagram>\n  <classes>\n    <class name="MyClass" type="class">\n      <attributes>\n        <attribute visibility="-" name="id" type="string" />\n      </attributes>\n      <methods>\n        <method visibility="+" name="getId" returnType="string" params="" />\n      </methods>\n    </class>\n  </classes>\n  <relationships />\n</diagram>`}
+            value={xmlImportContent}
+            onChange={(e) => setXmlImportContent(e.target.value)}
+          />
+          <div className="flex justify-end gap-2">
+            <Button variant="outline" onClick={() => setXmlImportOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleImportConfirm} disabled={!xmlImportContent.trim()}>
+              Import
+            </Button>
           </div>
         </DialogContent>
       </Dialog>

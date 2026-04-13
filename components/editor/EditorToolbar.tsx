@@ -8,6 +8,7 @@ import {
   BoxSelect,
   ChevronDown,
   Code2,
+  FileUp,
   Minus,
   Plus,
   Redo2,
@@ -35,6 +36,7 @@ interface EditorToolbarProps {
   activeRelationshipType: RelationshipType;
   onRelationshipTypeChange: (type: RelationshipType) => void;
   onPreviewXml: () => void;
+  onImportXml: () => void;
   onSubmit: () => void;
   canUndo: boolean;
   canRedo: boolean;
@@ -54,6 +56,7 @@ export default function EditorToolbar({
   activeRelationshipType,
   onRelationshipTypeChange,
   onPreviewXml,
+  onImportXml,
   onSubmit,
   canUndo,
   canRedo,
@@ -177,6 +180,10 @@ export default function EditorToolbar({
       <Separator orientation="vertical" className="mx-1 h-5" />
 
       {/* ── Actions ── */}
+      <Button variant="outline" size="sm" onClick={onImportXml}>
+        <FileUp className="size-3.5" />
+        Import XML
+      </Button>
       <Button variant="outline" size="sm" onClick={onPreviewXml}>
         <Code2 className="size-3.5" />
         Preview XML
